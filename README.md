@@ -9,12 +9,16 @@ _______________________________________________________
   - M Jean-Pierre (https://github.com/jpphi)
   - P Olivier (https://github.com/Olivier-Prince)
   - R Ludovic (https://github.com/Ludo-R)
+
+_______________________________________________________
   
 #### Contenus : 
 
   - bot.py
 
   - README.md
+
+_______________________________________________________
 
 #### Modalités
 

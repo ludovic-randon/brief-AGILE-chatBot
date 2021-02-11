@@ -91,7 +91,7 @@ class Stark(discord.Client, Chat):
                     await message.channel.send("Bonjour **%s** :smiley:" % message.author)
                 if mess == "!shutdown":
                     await message.channel.send("Bye bye !")
-                    await bot.logout()
+                    await self.logout()
 
 
             ## Discution

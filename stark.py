@@ -3,9 +3,11 @@ from discord.ext import commands
 import datetime
 import os
 from nltk.chat.util import Chat, reflections
+from sklearn.linear_model import SGDClassifier
 from pairs import pairs
 from dotenv import load_dotenv
 from pymongo import MongoClient
+import pickle
 import random
 import re
 
@@ -18,12 +20,15 @@ load_dotenv(dotenv_path="config")
 bot = commands.Bot(command_prefix = "!", description = "Bot numéro 1")
 date = datetime.datetime.now()
 
+emotion = pickle.load(open("emotion.sav", 'rb'))
+
 class Stark(discord.Client, Chat):
 
     ## Init : Stark class inherits from discord.Cliend and nltk.Chat
     def __init__(self, pairs, reflections):
         discord.Client.__init__(self)
         Chat.__init__(self, pairs, reflections)
+
 
     ## define bot base commands
     async def use_bot_command(self, mess):
@@ -39,13 +44,16 @@ class Stark(discord.Client, Chat):
             await message.channel.send("Bye bye !")
             await bot.logout()
 
+
     ## nltk chat bot    
     def nltk_respond(self, message):
         return self.respond(message)
 
     ## Query Database
     def mongodb_respond(self, mess):
-        title = db.Quest_Rep.find({"Title":mess})
+        title = db.Quest_Rep.find({"$text": {"$search": mess}},
+                                {'score': {'$meta': 'textScore'}})
+        title.sort([('score', {'$meta': 'textScore'})]).limit(1)
         ParentId = title[0].get("Id")
         all_resp = db.Quest_Rep.find({"ParentId":ParentId})
         list_resp = [resp.get("Body") for resp in all_resp]
@@ -69,7 +77,22 @@ class Stark(discord.Client, Chat):
         else:
             ## Base commands of the bot
             if mess.startswith('!'):
-                use_bot_command(mess)
+                if mess.startswith("!emotion"):
+                    request = [mess[9:]]
+                    feel = emotion.predict(request)
+                    await message.channel.send("Emotions : %s" %feel)
+                if mess == "!ping":
+                    await message.channel.send("Pong !")
+                if mess == "!date":
+                    await message.channel.send(f"**{date}**")
+                if mess == "!date":
+                    await message.channel.send("**%s**" % date)
+                if mess == "!bonjour":
+                    await message.channel.send("Bonjour **%s** :smiley:" % message.author)
+                if mess == "!shutdown":
+                    await message.channel.send("Bye bye !")
+                    await bot.logout()
+
 
             ## Discution
             else:

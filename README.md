@@ -18,10 +18,12 @@ Clone the repositary with :
 
 	git clone https://github.com/Ludo-R/brief-AGILE-chatBot
 
-Actually you can use create_DB.py to add a dataset to MongoDB but it only work with Stackexchange dataset :
+Actually you can use :
 
+	create_DB.py 
+	
+To add a dataset to MongoDB but it only work with Stackexchange dataset :
 https://archive.org/download/stackexchange
-
 If you want add another dataset from everywhere, you need to edit the target of query (actually "Title") and some other thing.
 
 (This step specify you need to know install MongoDB)
@@ -31,14 +33,10 @@ More information here : https://docs.mongodb.com/manual/installation/
 
 Create you'r Own BOT on https://discord.com/developers/applications
 Select -> New Applications
-Pick a name and select Create
-
+Pick a name and select Creat
 Go in "Bot" Section and select : Add bot
-
 Go in OAuth2 Section select "Bot" in the second columns, and below select Permission you want to give on you'r bot.
-
-After copy the link appear 
-
+After copy the link appear
 And past it, select you'r server where you are Admin,and select GO
 
 ### Step 3-- Connect bot
@@ -46,7 +44,9 @@ And past it, select you'r server where you are Admin,and select GO
 Go back on https://discord.com/developers/applications
 In "Bot" Section COPY the "Token"
 
-Open stark.py
+Open :
+	
+	stark.py
 
 Past your token on the last line in :
 

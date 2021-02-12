@@ -14,6 +14,8 @@ _______________________________________________________
   
 ### How to use :
 
+_______________________________________________________
+
 ### Step 1-- Download files
 
 Clone the repositary with :
@@ -33,6 +35,8 @@ If you want add another dataset from everywhere, you need to edit the target of 
 (This step specify you need to know install MongoDB)
 More information here : https://docs.mongodb.com/manual/installation/
 
+_______________________________________________________
+
 ### Step 2-- Create bot
 
 Create you'r Own BOT on https://discord.com/developers/applications
@@ -43,6 +47,8 @@ Create you'r Own BOT on https://discord.com/developers/applications
 	-Go in OAuth2 Section select "Bot" in the second columns, and below select Permission you want to give on you'r bot.
 	-After copy the link appear
 	-And past it, select you'r server where you are Admin,and select GO
+
+_______________________________________________________
 
 ### Step 3-- Connect bot
 

@@ -67,7 +67,7 @@ class Stark(discord.Client, Chat):
 
     async def on_message(self, message):
         mess = message.content
-        #mess = mess.lower() 
+        mess = mess.lower() 
 
         ## Do not respond itself 
         if message.author == self.user:
@@ -79,6 +79,8 @@ class Stark(discord.Client, Chat):
                     request = [mess[9:]]
                     feel = emotion.predict(request)
                     await message.channel.send("Emotions : %s" %feel)
+                if mess == "!help":
+                    await message.channel.send("```css\nHey %s ! I'm .J.A.R.V.I.S. !\n\nI am the super cool robot created by the renowned :STARK-Agency !\nMy masters are teaching me to imitate you to steal your life !\nIn the meantime, I’m gonna explain how I work to make you believe that I am here to help you \n\nAt the moment I am an expert in datasicene. You may adrress me anything on this topic !\n\nYou can use this command bellow :\n\n   - !ping -> Just for fun to respond you Pong\n\n   - !date -> To know the actual date and hour before i control this\n\n   - !bonjour -> Just for give you smile\n\n   - !emotion `your message` -> And i will predict how you feel\n\nYou can check my documentation on :http://jarvis.github.com```" % str(message.author)[:-5])
                 if mess == "!ping":
                     await message.channel.send("Pong !")
                 if mess == "!date":

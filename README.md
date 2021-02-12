@@ -14,6 +14,8 @@ _______________________________________________________
   
 ### How to use :
 
+### Step 1-- Download files
+
 Clone the repositary with :
 
 	git clone https://github.com/Ludo-R/brief-AGILE-chatBot

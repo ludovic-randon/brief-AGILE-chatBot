@@ -26,7 +26,6 @@ Actually you can use :
 	
 To add a dataset to MongoDB but it only work with Stackexchange dataset :
 https://archive.org/download/stackexchange
-
 You have just to edit the two first rows with your path, and dataset
 
 If you want add another dataset from everywhere, you need to edit the target of query (actually "Title") and some other thing.

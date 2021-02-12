@@ -32,12 +32,13 @@ More information here : https://docs.mongodb.com/manual/installation/
 ### Step 2-- Create bot
 
 Create you'r Own BOT on https://discord.com/developers/applications
--Select -> New Applications
--Pick a name and select Creat
--Go in "Bot" Section and select : Add bot
--Go in OAuth2 Section select "Bot" in the second columns, and below select Permission you want to give on you'r bot.
--After copy the link appear
--And past it, select you'r server where you are Admin,and select GO
+	
+	-Select -> New Applications
+	-Pick a name and select Creat
+	-Go in "Bot" Section and select : Add bot
+	-Go in OAuth2 Section select "Bot" in the second columns, and below select Permission you want to give on you'r bot.
+	-After copy the link appear
+	-And past it, select you'r server where you are Admin,and select GO
 
 ### Step 3-- Connect bot
 

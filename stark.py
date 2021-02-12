@@ -35,14 +35,12 @@ class Stark(discord.Client, Chat):
         if mess == "!ping":
             await message.channel.send("Pong !")
         if mess == "!date":
-            await message.channel.send(f"**{date}**")
-        if mess == "!date":
             await message.channel.send("**%s**" % date)
         if mess == "!bonjour":
             await message.channel.send("Bonjour **%s** :smiley:" % message.author)
         if mess == "!shutdown":
             await message.channel.send("Bye bye !")
-            await bot.logout()
+            await self.logout()
 
 
     ## nltk chat bot    
@@ -51,8 +49,8 @@ class Stark(discord.Client, Chat):
 
     ## Query Database
     def mongodb_respond(self, mess):
-        title = db.Quest_Rep.find({"$text": {"$search": mess}},
-                                {'score': {'$meta': 'textScore'}})
+        title = db.Quest_Rep.find({"$text": {"$search": mess}, 'AnswerCount': {"$ne": "0"}},
+            {'score': {'$meta': 'textScore'}})
         title.sort([('score', {'$meta': 'textScore'})]).limit(1)
         ParentId = title[0].get("Id")
         all_resp = db.Quest_Rep.find({"ParentId":ParentId})
@@ -84,8 +82,6 @@ class Stark(discord.Client, Chat):
                 if mess == "!ping":
                     await message.channel.send("Pong !")
                 if mess == "!date":
-                    await message.channel.send(f"**{date}**")
-                if mess == "!date":
                     await message.channel.send("**%s**" % date)
                 if mess == "!bonjour":
                     await message.channel.send("Bonjour **%s** :smiley:" % message.author)
@@ -103,8 +99,10 @@ class Stark(discord.Client, Chat):
 
                 ## Query mongodb DataBase
                 else:
-                    mongo_resp = self.mongodb_respond(mess)
-                    await message.channel.send("%s"%mongo_resp)
+                    resp = self.mongodb_respond(mess)
+                    if resp==None:
+                        resp = "i'm just a baby of 3 days old, i'm still learning"
+                    await message.channel.send("%s"%resp)
 
 client = Stark(pairs, reflections)
 #client.run(os.getenv("TOKEN"))  

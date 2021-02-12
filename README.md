@@ -12,7 +12,7 @@ _______________________________________________________
 
 _______________________________________________________
   
-#### How to use :
+### How to use :
 
 Clone the repositary with :
 
@@ -26,4 +26,33 @@ If you want add another dataset from everywhere, you need to edit the target of 
 
 (This step specify you need to know install MongoDB)
 More information here : https://docs.mongodb.com/manual/installation/
+
+### Step 2-- Create bot
+
+Create you'r Own BOT on https://discord.com/developers/applications
+Select -> New Applications
+Pick a name and select Create
+
+Go in "Bot" Section and select : Add bot
+
+Go in OAuth2 Section select "Bot" in the second columns, and below select Permission you want to give on you'r bot.
+
+After copy the link appear 
+
+And past it, select you'r server where you are Admin,and select GO
+
+### Step 3-- Connect bot
+
+Go back on https://discord.com/developers/applications
+In "Bot" Section COPY the "Token"
+
+Open stark.py
+
+Past your token on the last line in :
+
+	client.run('PAST YOUR TOKEN')
+
+Run the apy
+
+### ENJOY You'r new friend is Ready
  

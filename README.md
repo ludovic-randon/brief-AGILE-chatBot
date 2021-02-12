@@ -12,30 +12,18 @@ _______________________________________________________
 
 _______________________________________________________
   
-#### Contenus : 
+#### How to use :
 
-  - bot.py
+Clone the repositary with :
 
-  - README.md
+	git clone https://github.com/Ludo-R/brief-AGILE-chatBot
 
-_______________________________________________________
+Actually you can use create_DB.py to add a dataset to MongoDB but it only work with Stackexchange dataset :
 
-#### Modalités :
+https://archive.org/download/stackexchange
 
-  __1.__ Mise en place et gestion du projet en respectant la méthode agile Scrum (rôles, rituels, outils, artefacts)
-  
-  __2.__ Établir les KPI (Indicateurs de performance) de l'ensemble du projet mené en Scrum
-  
-  __3.__ Possibilité de poser 4 questions par jour à votre PO > Questions à bien déterminer en groupe, posées par le SM au PO
-  
-  __4.__ Définir et hiérarchiser les objectifs de votre Chatbot : que doit faire le bot et pourquoi
-  
-  __5.__ Identifier les utilisateur·trices·s et leurs besoins : Qu'est ce que l'utilisateur va chercher ? Comment va-t-il le chercher ? Comment va-t-il le formuler ? > définition des premiers périmètres fonctionnels
-  
-  __6.__ Définition du scénario conversationnel > l'efficacité d’un chabot dépend directement de la rédaction du scénario qui servira de base à ses interactions avec les utilisateurs
-  
-  __7.__ votre github doit contenir:
-* le liens vers vous outils d'organisation (Kanban, objectifs...)
-* votre code permettant de lancer votre bot avec les instruction éventuelles intermédiaire (dépendances,
-configuration...)
+If you want add another dataset from everywhere, you need to edit the target of query (actually "Title") and some other thing.
+
+(This step specify you need to know install MongoDB)
+More information here : https://docs.mongodb.com/manual/installation/
  

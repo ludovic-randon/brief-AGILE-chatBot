@@ -101,10 +101,12 @@ class Stark(discord.Client, Chat):
 
                 ## Query mongodb DataBase
                 else:
-                    resp = self.mongodb_respond(mess)
-                    if resp==None:
-                        resp = "i'm just a baby of 3 days old, i'm still learning"
-                    await message.channel.send("%s"%resp)
+                    try:
+                        resp = self.mongodb_respond(mess)
+                        await message.channel.send("%s"%resp)
+                    except IndexError:
+                        resp = "I'm just a baby of 3 days old, i'm still learning.\nWhat do you mean by **%s** ?"%mess
+                        await message.channel.send("%s"%resp)
 
 client = Stark(pairs, reflections)
 #client.run(os.getenv("TOKEN"))  

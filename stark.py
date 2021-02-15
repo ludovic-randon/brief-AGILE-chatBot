@@ -10,6 +10,7 @@ from pymongo import MongoClient
 import pickle
 import random
 import re
+import asyncio
 
 client = MongoClient("localhost", 27017)
 db = client["StarkBotBD"]
@@ -64,6 +65,14 @@ class Stark(discord.Client, Chat):
         print(self.user.name)
         print(self.user.id)
         print('------')
+        await client.get_channel(808617144504811584).send("```   __,_,\n  [_|_/           Hello there i'm Online\n   //\n _//    __            J.A.R.V.I.S\n(_|)   |@@|\n \ \__ \--/ __            Stark Agency\n  \o__|----|  |   __\n      \ }{ /\ )_ / _\ \n      /\__/\ \__O (__\n     (--/\--)    \__/\n     _)(  )(_                                        ID: CAABMBJMOPLR\n    `---''---`\n```")
+
+        ## Auto message on start every hours
+        timeout = 60*60  #60 minutes
+        messauto = "```Hey Human !\n\nI would be pleased to help you on any topic in dastascience field !\n\nFeel free to adress me the subject by conversation or question any time.\nFor more information you may just type : !help\n\nActually with my team we are working on an amazing BOT Challenge brief !\nIf you are curious, you may download the brief here :\n\nhttps://cdn.discordapp.com/attachments/783660084395769887/808333411948429322/Brief-IA-Methodes-Agiles_-_Sprint_1.pdf\n\nHave a nice day !```"
+        while True:
+            await client.get_channel(808617144504811584).send(messauto)
+            await asyncio.sleep(timeout)
 
     async def on_message(self, message):
         mess = message.content
@@ -80,13 +89,13 @@ class Stark(discord.Client, Chat):
                     feel = emotion.predict(request)
                     await message.channel.send("Emotions : %s" %feel)
                 if mess == "!help":
-                    await message.channel.send("```css\nHey %s ! I'm .J.A.R.V.I.S. !\n\nI am the super cool robot created by the renowned :STARK-Agency !\nMy masters are teaching me to imitate you to steal your life !\nIn the meantime, I’m gonna explain how I work to make you believe that I am here to help you \n\nAt the moment I am an expert in datasicene. You may adrress me anything on this topic !\n\nYou can use this command bellow :\n\n   - !ping -> Just for fun to respond you Pong\n\n   - !date -> To know the actual date and hour before i control this\n\n   - !bonjour -> Just for give you smile\n\n   - !emotion `your message` -> And i will predict how you feel\n\nYou can check my documentation on :http://jarvis.github.com```" % str(message.author)[:-5])
+                    await message.channel.send("```css\nHey %s ! I'm .J.A.R.V.I.S. !\n\nI am the super cool robot created by the renowned :STARK-Agency !\nMy masters are teaching me to imitate you to steal your life !\nIn the meantime, I’m gonna explain how I work to make you believe that I am here to help you \n\nAt the moment I am an expert in datasicene. You may adrress me anything on this topic !\n\nYou can use this command bellow :\n\n   - !ping -> Just for fun to respond you Pong.. no in really i give you'r latency\n\n   - !date -> To know the actual date and hour before i control this\n\n   - !bonjour -> Just for give you smile\n\n   - !emotion `your message` -> And i will predict how you feel\n\nYou can check my documentation on :http://jarvis.github.com```" % str(message.author)[:-5])
                 if mess == "!ping":
-                    await message.channel.send("Pong !")
+                    await message.channel.send("Pong ! joke.. You'r ping : {:.0f} ms".format(self.latency * 1000))
                 if mess == "!date":
-                    await message.channel.send("**%s**" % date)
+                    await message.channel.send("**%s**" % str(date)[:-7])
                 if mess == "!bonjour":
-                    await message.channel.send("Bonjour **%s** :smiley:" % message.author)
+                    await message.channel.send("Bonjour **%s** :smiley:" % str(message.author)[:-5])
                 if mess == "!shutdown":
                     await message.channel.send("Bye bye !")
                     await self.logout()

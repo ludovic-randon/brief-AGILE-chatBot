@@ -60,7 +60,7 @@ class Stark(discord.Client, Chat):
         list_resp = [resp.get("Body") for resp in all_resp]
         resp = random.choice(list_resp)
         mongo_resp = re.sub('<[^<]+?>', '', resp)
-        return mongo_resp
+        return mongo_resp, ParentId
 
     async def on_ready(self):
         print('Logged in as')
@@ -92,7 +92,36 @@ class Stark(discord.Client, Chat):
                     await message.channel.send("I can talk again !")
                 if mess == "!stop":
                     self.flag = False
-                    await message.channel.send(":zipper_mouth:")
+                    await message.channel.send("Thanks for using me !")
+                    msg = await message.channel.send("```Evaluate me :```")
+                    await msg.add_reaction('😃')
+                    await msg.add_reaction('😐')
+                    await msg.add_reaction('🙁')
+                        
+                    reac_list = ['😃','😐','🙁']
+                    check = lambda reaction, user: user == message.author and str(reaction) in reac_list
+
+                    try:    
+                    # Waiting for the reaction
+                        reaction, user = await client.wait_for('reaction_add', check=check, timeout=10.0)
+                        bot_ratings = pickle.load(open("bot_rating.sav", 'rb'))
+                        if str(reaction) == "😃":
+                            bot_ratings.append(2)
+                            pickle.dump(bot_ratings, open("bot_rating.sav", 'wb'))
+                            await message.channel.send("```Thanks for you'r report```")
+
+                        if str(reaction) == "😐":
+                            bot_ratings.append(1)
+                            pickle.dump(bot_ratings, open("bot_rating.sav", 'wb'))
+                            await message.channel.send("```Thanks for you'r report```")
+
+                        if str(reaction) == "🙁":
+                            bot_ratings.append(0)
+                            pickle.dump(bot_ratings, open("bot_rating.sav", 'wb'))
+                            await message.channel.send("```Thanks for you'r report```") 
+
+                    except asyncio.TimeoutError:
+                        await msg.delete()
                 if mess == "!shutdown":
                         await message.channel.send("Bye bye !")
                         await self.logout()
@@ -128,8 +157,28 @@ class Stark(discord.Client, Chat):
                     ## Query mongodb DataBase
                     else:
                         try:
-                            resp = self.mongodb_respond(mess)
+                            resp, quest_id = self.mongodb_respond(mess)
                             await message.channel.send("%s"%resp)
+                            msg = await message.channel.send("```Would you kindly help us to improve out bot by rating the relevance of the answer```")
+                            await msg.add_reaction('👍')
+                            await msg.add_reaction('👎')
+                        
+                            reac_list = ['👍','👎']
+                            check = lambda reaction, user: user == message.author and str(reaction) in reac_list
+
+                            try:
+                            # Waiting for the reaction
+                                reaction, user = await client.wait_for('reaction_add', check=check, timeout=60.0)
+
+                                if str(reaction) == "👍":
+                                    await message.channel.send("```Thanks for you'r feedback```")
+ 
+                                if str(reaction) == "👎":
+                                    await message.channel.send("```Thanks for you'r feedback\nHelp us to improve with typing : !imp %s ANSWER```"%quest_id)
+
+                            except asyncio.TimeoutError:
+                                await msg.delete()  
+                        
                         except IndexError:
                             resp = "I'm just a baby of 3 days old, i'm still learning.\nWhat do you mean by **%s** ?"%mess
                             await message.channel.send("%s"%resp)

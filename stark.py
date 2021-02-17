@@ -56,11 +56,17 @@ class Stark(discord.Client, Chat):
             {'score': {'$meta': 'textScore'}})
         title.sort([('score', {'$meta': 'textScore'})]).limit(1)
         ParentId = title[0].get("Id")
-        all_resp = db.Quest_Rep.find({"ParentId":ParentId})
+        all_resp = db.Quest_Rep.find({"ParentId":ParentId}).sort([('Score', -1)]).limit(5)
         list_resp = [resp.get("Body") for resp in all_resp]
-        resp = random.choice(list_resp)
-        mongo_resp = re.sub('<[^<]+?>', '', resp)
-        return mongo_resp
+        #resp = list_resp[0]
+        final_resp = []
+        for i in list_resp:
+            i = re.sub('<[^<]+?>', '', i)
+            final_resp.append(i)
+
+        
+        #mongo_resp = re.sub('<[^<]+?>', '', resp)
+        return final_resp, ParentId
 
     async def on_ready(self):
         print('Logged in as')
@@ -89,10 +95,41 @@ class Stark(discord.Client, Chat):
             if mess.startswith('!'):
                 if mess == "!start":
                     self.flag = True
-                    await message.channel.send("I can talk again !")
+                    await message.channel.send("Hey there, how can i help you ?")
+
                 if mess == "!stop":
                     self.flag = False
-                    await message.channel.send(":zipper_mouth:")
+                    await message.channel.send("Thanks for using me !")
+                    msg = await message.channel.send("```Evaluate me :```")
+                    await msg.add_reaction('😃')
+                    await msg.add_reaction('😐')
+                    await msg.add_reaction('🙁')
+                        
+                    reac_list = ['😃','😐','🙁']
+                    check = lambda reaction, user: user == message.author and str(reaction) in reac_list
+
+                    try:    
+                    # Waiting for the reaction
+                        reaction, user = await client.wait_for('reaction_add', check=check, timeout=10.0)
+                        bot_ratings = pickle.load(open("bot_rating.sav", 'rb'))
+                        if str(reaction) == "😃":
+                            bot_ratings.append(2)
+                            pickle.dump(bot_ratings, open("bot_rating.sav", 'wb'))
+                            await message.channel.send("```Thanks for you'r report```")
+
+                        if str(reaction) == "😐":
+                            bot_ratings.append(1)
+                            pickle.dump(bot_ratings, open("bot_rating.sav", 'wb'))
+                            await message.channel.send("```Thanks for you'r report```")
+
+                        if str(reaction) == "🙁":
+                            bot_ratings.append(0)
+                            pickle.dump(bot_ratings, open("bot_rating.sav", 'wb'))
+                            await message.channel.send("```Thanks for you'r report```") 
+
+                    except asyncio.TimeoutError:
+                        await msg.delete()
+
                 if mess == "!shutdown":
                         await message.channel.send("Bye bye !")
                         await self.logout()
@@ -102,8 +139,20 @@ class Stark(discord.Client, Chat):
                         request = [mess[9:]]
                         feel = emotion.predict(request)
                         await message.channel.send("Emotions : %s" %feel)
+                    if mess.startswith("!suggestion"):
+                        request = [mess[12:]]
+                        await message.channel.send("Thanks **%s** for you'r suggestion : **%s**" %(str(message.author)[:-5], request))
+                    if mess.startswith("!imp"):
+                        request = [mess[5:]]
+                    if mess == "!score":
+                        bot_ratings = pickle.load(open("bot_rating.sav", 'rb'))
+                        good = bot_ratings.count(2)
+                        medium = bot_ratings.count(1)
+                        bad = bot_ratings.count(0)
+                        await message.channel.send("Ratings of the bot :\n\nGood -> **%s**\nMedium -> **%s**\nBad -> **%s**" % (good, medium, bad))
+
                     if mess == "!help":
-                        await message.channel.send("```css\nHey %s ! I'm .J.A.R.V.I.S. !\n\nI am the super cool robot created by the renowned :STARK-Agency !\nMy masters are teaching me to imitate you to steal your life !\nIn the meantime, I’m gonna explain how I work to make you believe that I am here to help you \n\nAt the moment I am an expert in datasicene. You may adrress me anything on this topic !\n\nYou can use this command bellow :\n\n   - !ping -> Just for fun to respond you Pong.. No in really i give you'r ping latency\n\n   - !date -> To know the actual date and hour before i control this\n\n   - !bonjour -> Just for give you smile\n\n   - !emotion `your message` -> And i will predict how you feel\n\nYou can check my documentation on :http://jarvis.github.com```" % str(message.author)[:-5])
+                        await message.channel.send("```css\nHey %s ! I'm .J.A.R.V.I.S. !\n\nI am the super cool robot created by the renowned :STARK-Agency !\nMy masters are teaching me to imitate you to steal your life !\nIn the meantime, I’m gonna explain how I work to make you believe that I am here to help you \n\nAt the moment I am an expert in datasicene. You may adrress me anything on this topic !\n\nYou can use this command bellow :\n\n   - !start -> To start converse with me\n\n   - !stop -> To stop me and evaluate me\n\n   - !suggestion (You'r suggestion) -> To give us suggestion\n\n   - !ping -> Just for fun to respond you Pong.. No in really i give you'r ping latency\n\n   - !date -> To know the actual date and hour before i control this\n\n   - !bonjour -> Just for give you smile\n\n   - !emotion `your message` -> And i will predict how you feel\n\nYou can check my documentation on :http://jarvis.github.com```" % str(message.author)[:-5])
                     if mess == "!ping":
                         await message.channel.send("Pong ! joke.. You'r ping : {:.0f} ms".format(self.latency * 1000))
                     if mess == "!date":
@@ -128,8 +177,28 @@ class Stark(discord.Client, Chat):
                     ## Query mongodb DataBase
                     else:
                         try:
-                            resp = self.mongodb_respond(mess)
-                            await message.channel.send("%s"%resp)
+                            resp, quest_id = self.mongodb_respond(mess)
+ 
+                            for i in resp:
+                                await message.channel.send(i)
+                                msg = await message.channel.send("```Would you kindly help us to improve out bot by rating the relevance of the answer```")
+                                await msg.add_reaction('👍')
+                                await msg.add_reaction('👎')
+                            
+                                reac_list = ['👍','👎']
+                                check = lambda reaction, user: user == message.author and str(reaction) in reac_list
+                                try:
+                                # Waiting for the reaction
+                                    reaction, user = await client.wait_for('reaction_add', check=check, timeout=60.0)
+
+                                    if str(reaction) == "👍":
+                                        await message.channel.send("```Thanks for you'r feedback```")
+                                        break
+                                    if str(reaction) == "👎":
+                                        await message.channel.send("```Thanks for you'r feedback\nHelp us to improve with typing : !imp %s ANSWER```"%quest_id)
+                                except asyncio.TimeoutError:
+                                    await msg.delete()
+                                    break  
                         except IndexError:
                             resp = "I'm just a baby of 3 days old, i'm still learning.\nWhat do you mean by **%s** ?"%mess
                             await message.channel.send("%s"%resp)

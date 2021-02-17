@@ -4,7 +4,7 @@ import os
 import pymongo
 from pymongo import MongoClient
 
-data_path = fr'{os.getenv("HOME")}/Documents/Briefs/2_Block_janv_fev/20210208_Brief_Agile/Datas'
+data_path = fr'{os.getenv("HOME")}/workspace/data/'
 #subdir = "workplace.meta.stackexchange.com"
 file_name = "Posts.xml"
 
@@ -46,20 +46,23 @@ def create_mongodb_database(src, file_name):
                 ## Insert elements
                 db.Quest_Rep.insert(post_list)
 
-                ## Create Index
-                db.Quest_Rep.drop_index()
-                #### Text search
-                db.Quest_Rep.create_index([('Title', 'text'), ('Body', 'text')],
-                          weights = {'Title':2, 'Body':1}, 
-                          name = "text_search")
-                #### Topic
-                db.Quest_Rep.create_index("Topic")
-                #### Score
-                db.Quest_Rep.create_index("Score")
-                #### PostTypeId
-                db.Quest_Rep.create_index("PostTypeId")
-                #### ParentId
-                db.Quest_Rep.create_index("ParentId")
+    connection = MongoClient()
+    db = connection["StarkBotBD"] 
+
+    ## Ajout collection
+    Quest_Rep = db["Quest_Rep"] 
+
+    db.Quest_Rep.create_index([('Title', 'text'), ('Body', 'text')],
+        weights = {'Title':2, 'Body':1}, 
+        name = "text_search")
+    #### Topic
+    db.Quest_Rep.create_index("Topic")
+    #### Score
+    db.Quest_Rep.create_index("Score")
+    #### PostTypeId
+    db.Quest_Rep.create_index("PostTypeId")
+    #### ParentId
+    db.Quest_Rep.create_index("ParentId")
 
 if __name__=="__main__":
     create_mongodb_database(data_path, file_name)

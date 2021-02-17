@@ -180,7 +180,14 @@ class Stark(discord.Client, Chat):
                             resp, quest_id = self.mongodb_respond(mess)
  
                             for i in resp:
-                                await message.channel.send(i)
+                                if len(i) > 1900:
+                                    i1 = i[:1900]
+                                    i2 = i[1901:]
+                                    await message.channel.send(i1)
+                                    await message.channel.send(i2)
+
+                                else:
+                                    await message.channel.send(i)
                                 msg = await message.channel.send("```Would you kindly help us to improve out bot by rating the relevance of the answer```")
                                 await msg.add_reaction('👍')
                                 await msg.add_reaction('👎')

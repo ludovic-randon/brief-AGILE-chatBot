@@ -46,5 +46,20 @@ def create_mongodb_database(src, file_name):
                 ## Insert elements
                 db.Quest_Rep.insert(post_list)
 
+                ## Create Index
+                db.Quest_Rep.drop_index()
+                #### Text search
+                db.Quest_Rep.create_index([('Title', 'text'), ('Body', 'text')],
+                          weights = {'Title':2, 'Body':1}, 
+                          name = "text_search")
+                #### Topic
+                db.Quest_Rep.create_index("Topic")
+                #### Score
+                db.Quest_Rep.create_index("Score")
+                #### PostTypeId
+                db.Quest_Rep.create_index("PostTypeId")
+                #### ParentId
+                db.Quest_Rep.create_index("ParentId")
+
 if __name__=="__main__":
     create_mongodb_database(data_path, file_name)

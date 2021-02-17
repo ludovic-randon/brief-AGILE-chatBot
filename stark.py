@@ -196,7 +196,7 @@ class Stark(discord.Client, Chat):
                                 check = lambda reaction, user: user == message.author and str(reaction) in reac_list
                                 try:
                                 # Waiting for the reaction
-                                    reaction, user = await client.wait_for('reaction_add', check=check, timeout=10.0)
+                                    reaction, user = await client.wait_for('reaction_add', check=check, timeout=60.0)
 
                                     if str(reaction) == "👍":
                                         await message.channel.send("```Thanks for you'r feedback```")

@@ -11,6 +11,7 @@ import pickle
 import random
 import re
 import asyncio
+from sklearn.preprocessing import LabelEncoder
 
 client = MongoClient("localhost", 27017)
 db = client["StarkBotBD"]
@@ -22,6 +23,13 @@ bot = commands.Bot(command_prefix = "!", description = "Bot numéro 1")
 date = datetime.datetime.now()
 
 emotion = pickle.load(open("emotion.sav", 'rb'))
+
+## model classifier Topic
+filename = "classifier_topic.pickle"
+classif_topic = pickle.load(open(filename, 'rb'))
+topics = ['astronomy', 'earthscience', 'electronics', 'engineering', 'space', 'stellar', 'general']
+le = LabelEncoder()
+le.fit(topics)
 
 class Stark(discord.Client, Chat):
 
@@ -51,12 +59,12 @@ class Stark(discord.Client, Chat):
         return self.respond(message)
 
     ## Query Database
-    def mongodb_respond(self, mess):
-        title = db.Quest_Rep.find({"$text": {"$search": mess}, 'AnswerCount': {"$ne": "0"}},
+    def mongodb_respond(self, mess, topic):
+        title = db.Quest_Rep.find({"$text": {"$search": mess}, 'AnswerCount': {"$ne": "0"}, 'Topic':topic},
             {'score': {'$meta': 'textScore'}})
         title.sort([('score', {'$meta': 'textScore'})]).limit(1)
         ParentId = title[0].get("Id")
-        all_resp = db.Quest_Rep.find({"ParentId":ParentId}).sort([('Score', -1)]).limit(5)
+        all_resp = db.Quest_Rep.find({"ParentId":ParentId, 'Topic':topic}).sort([('Score', -1)]).limit(5)
         list_resp = [resp.get("Body") for resp in all_resp]
         #resp = list_resp[0]
         final_resp = []
@@ -169,6 +177,11 @@ class Stark(discord.Client, Chat):
                 ## Discution
             else:
                 if self.flag == True:
+                    topic = classif_topic.predict([mess])
+                    print(topic)
+                    topic = le.inverse_transform(topic)
+                    print(topic[0])
+
                     ## nltk chat part 
                     resp = self.nltk_respond(mess)
                     if resp :
@@ -177,7 +190,7 @@ class Stark(discord.Client, Chat):
                     ## Query mongodb DataBase
                     else:
                         try:
-                            resp, quest_id = self.mongodb_respond(mess)
+                            resp, quest_id = self.mongodb_respond(mess, topic[0])
  
                             for i in resp:
                                 await message.channel.send(i)

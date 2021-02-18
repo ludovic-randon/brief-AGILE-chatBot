@@ -25,19 +25,6 @@ date = datetime.datetime.now()
 
 emotion = pickle.load(open("./models/emotion.sav", 'rb'))
 
-#### Topic
-db.Quest_Rep.create_index("Topic")
-#### Score
-db.Quest_Rep.create_index("Score")
-#### PostTypeId
-db.Quest_Rep.create_index("PostTypeId")
-#### ParentId
-db.Quest_Rep.create_index("ParentId")
-#### AnswerCount
-db.Quest_Rep.create_index("AnswerCount")
-#### Id
-db.Quest_Rep.create_index("Id")
-
 ## model classifier Topic
 filename = "./models/classifier_topic.pickle"
 classif_topic = pickle.load(open(filename, 'rb'))
@@ -46,7 +33,7 @@ le_topic = LabelEncoder()
 le_topic.fit(topics)
 
 ## model classifier language
-filename = "classifier_topic.pickle"
+filename = "./models/classifier_language.pickle"
 classif_language = pickle.load(open(filename, 'rb'))
 languages = ['english', 'french']
 le_language = LabelEncoder()
@@ -211,12 +198,10 @@ class Stark(discord.Client, Chat):
                     language = le_language.inverse_transform(language)
                     print(language[0])
 
-
                     ## nltk chat part 
                     resp = self.nltk_respond(mess)
                     if resp :
                         await message.channel.send(resp)
-
                     ## Query mongodb DataBase
                     else:
                         try:

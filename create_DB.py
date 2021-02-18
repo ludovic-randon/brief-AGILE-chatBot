@@ -27,7 +27,7 @@ def create_mongodb_database(src, file_name):
                     topic = subdir[:-23]
                     print(topic)
                 else:
-                    topic = subdir[:-17]
+                    topic = subdir[:-18]
 
                 post_list = [row.attrib for row in posts]
                 for post in post_list: 

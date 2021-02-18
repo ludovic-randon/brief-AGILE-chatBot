@@ -13,8 +13,12 @@ import re
 import asyncio
 from sklearn.preprocessing import LabelEncoder
 import time
+
+import numpy as np
+
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
+
 
 client = MongoClient("localhost", 27017)
 db = client["StarkBotBD"]
@@ -228,6 +232,10 @@ class Stark(discord.Client, Chat):
                     topic = le_topic.inverse_transform(topic)
                     print(topic[0])
 
+                    liste_topic = list(le_topic.inverse_transform([0, 1, 2, 3, 4, 5, 6]))
+                    pred_proba = classif_topic.predict_proba([mess])
+                    liste_proba = list(pred_proba[0])
+
                     ## Language identification
                     language = classif_language.predict([mess])
                     language = le_language.inverse_transform(language)
@@ -260,13 +268,38 @@ class Stark(discord.Client, Chat):
                         ##else:
 
                     ## Query mongodb DataBase
-                    print(flag_resp)
-                    if flag_resp==False:
+                    
+                    if flag_resp==Fals:
+                        for i in range(7):
+                            best_topic = liste_topic[np.argmax(liste_proba)]
+                            msg = await message.channel.send("Are you speaking about %s ?\nWould you please confirm by a yes or a no" %best_topic)
+                            await msg.add_reaction('✅')
+                            await msg.add_reaction('❌')
+                                
+                            reac_list = ['✅','❌']
+                            check = lambda reaction, user: user == message.author and str(reaction) in reac_list
+                            try:
+                            # Waiting for the reaction
+                                reaction, user = await client.wait_for('reaction_add', check=check, timeout=30.0)
+                                if str(reaction) == "✅":
+                                    print("ok")
+                                    break
+                                if str(reaction) == "❌":
+                                    print("switch")
+                                    idx = np.argmax(liste_proba)
+                                    liste_proba.pop(idx)
+                                    liste_topic.pop(idx)
+
+                            except asyncio.TimeoutError:
+                                print("async")
+
                         try:
                             print('recherche mongoDB')
                             print(mess)
                             pic = await message.channel.send(file=discord.File('wait.gif'))
-                            resp, quest_id = self.mongodb_respond(mess, topic[0])## language 
+
+                            resp, quest_id = self.mongodb_respond(mess, best_topic)
+
                             await pic.delete()
 
                             for i in resp:
@@ -292,7 +325,7 @@ class Stark(discord.Client, Chat):
                                         await message.channel.send("```Thanks for you'r feedback```")
                                         break
                                     if str(reaction) == "👎":
-                                        await message.channel.send("```Thanks for you'r feedback\nHelp us to improve with typing : !imp %s %s ANSWER```"%(quest_id, topic[0]))
+                                        await message.channel.send("```Thanks for you'r feedback\nHelp us to improve with typing : !imp %s %s ANSWER```"%(quest_id, best_topic))
                                 except asyncio.TimeoutError:
                                     await msg.delete()
                                     break  

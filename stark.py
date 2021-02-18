@@ -13,6 +13,8 @@ import re
 import asyncio
 from sklearn.preprocessing import LabelEncoder
 import time
+from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
 
 client = MongoClient("localhost", 27017)
 db = client["StarkBotBD"]
@@ -47,16 +49,48 @@ class Stark(discord.Client, Chat):
         Chat.__init__(self, pairs, reflections)
         self.flag = flag
         self.flag = True
+        self.threshold_chatterbot = 0.6
+        self.chatterbot_french = self.chatterbot_fcn('jarvis','french' )
+        self.chatterbot_english = self.chatterbot_fcn('jarvis','english' )
 
     ## nltk chat bot    
     def nltk_respond(self, message):
         return self.respond(message)
 
+    ## Chatterbot
+    def chatterbot_fcn(self, nom, language):
+        
+        chatbot = ChatBot(nom, logic_adapters=[
+                                'chatterbot.logic.MathematicalEvaluation',
+                                'chatterbot.logic.BestMatch'
+                            ],
+                        )
+        trainer = ChatterBotCorpusTrainer(chatbot)
+        # Corpus d'entrainement
+        if language=='english':
+            trainer.train(
+                "chatterbot.corpus.english"
+                # "chatterbot.corpus.english.ai",
+                # 'chatterbot.corpus.english.botprofile',
+                # "chatterbot.corpus.english.humor",
+                # "chatterbot.corpus.english.conversations",
+                # "chatterbot.corpus.english.greetings"
+            )
+        elif language=='french':
+            trainer.train(
+                'chatterbot.corpus.french'
+                # 'chatterbot.corpus.french.greetings',
+                # 'chatterbot.corpus.french'
+            )
+        return chatbot
+
+    
     ## Query Database
     def mongodb_respond(self, mess, topic):
         
         title = db.Quest_Rep.find({"$text": {"$search": mess}, 'Topic':topic, 'AnswerCount': {"$ne": "0"}}, {'score': {'$meta': 'textScore'}})
         title.sort([('score', {'$meta': 'textScore'})]).limit(1)
+        print(title[0].get("Title"))
 
         ParentId = title[0].get("Id")
         
@@ -69,7 +103,6 @@ class Stark(discord.Client, Chat):
             i = re.sub('<[^<]+?>', '', i)
             final_resp.append(i)
 
-        
         return final_resp, ParentId
 
     async def on_ready(self):
@@ -189,7 +222,7 @@ class Stark(discord.Client, Chat):
                 ## Discution
             else:
                 if self.flag == True:
-
+                    print('')
                     ## Topic identification
                     topic = classif_topic.predict([mess])
                     topic = le_topic.inverse_transform(topic)
@@ -200,19 +233,40 @@ class Stark(discord.Client, Chat):
                     language = le_language.inverse_transform(language)
                     print(language[0])
 
-
                     ## nltk chat part 
+                    flag_resp = False
                     resp = self.nltk_respond(mess)
                     if resp :
+                        flag_resp = True
                         db.Emotion.insert_one({"User":str(message.author), "Message":mess, "Date":str(date)[:-7]})
                         await message.channel.send(resp)
 
-                    ## Query mongodb DataBase
-                    else:
-                        try:
+                    ## Chatterbot
+                    if (topic[0]=='general') and (flag_resp==False):
+                        mess_chatterbot = mess.upper()
+                        db.Emotion.insert_one({"User":str(message.author), "Message":mess, "Date":str(date)[:-7]})
+                        if language[0]=='english':
+                            resp = self.chatterbot_english.get_response(mess_chatterbot)
+                            print('mess :', mess_chatterbot, 'chatterbot english, resp :', resp, ', confidence', resp.confidence)
+                            if resp.confidence>=self.threshold_chatterbot:
+                                flag_resp = True
+                                await message.channel.send(resp)
+                        elif language[0]=='french':
+                            resp = self.chatterbot_french.get_response(mess_chatterbot)
+                            print('mess :', mess_chatterbot, 'chatterbot french, resp :', resp, ', confidence', resp.confidence)
+                            if resp.confidence>=self.threshold_chatterbot:
+                                flag_resp = True
+                                await message.channel.send(resp)
+                        ##else:
 
+                    ## Query mongodb DataBase
+                    print(flag_resp)
+                    if flag_resp==False:
+                        try:
+                            print('recherche mongoDB')
+                            print(mess)
                             pic = await message.channel.send(file=discord.File('wait.gif'))
-                            resp, quest_id = self.mongodb_respond(mess, topic[0])
+                            resp, quest_id = self.mongodb_respond(mess, topic[0])## language 
                             await pic.delete()
 
                             for i in resp:

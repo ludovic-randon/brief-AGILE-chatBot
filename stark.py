@@ -25,19 +25,6 @@ date = datetime.datetime.now()
 
 emotion = pickle.load(open("./models/emotion.sav", 'rb'))
 
-#### Topic
-db.Quest_Rep.create_index("Topic")
-#### Score
-db.Quest_Rep.create_index("Score")
-#### PostTypeId
-db.Quest_Rep.create_index("PostTypeId")
-#### ParentId
-db.Quest_Rep.create_index("ParentId")
-#### AnswerCount
-db.Quest_Rep.create_index("AnswerCount")
-#### Id
-db.Quest_Rep.create_index("Id")
-
 ## model classifier Topic
 filename = "./models/classifier_topic.pickle"
 classif_topic = pickle.load(open(filename, 'rb'))
@@ -46,7 +33,7 @@ le_topic = LabelEncoder()
 le_topic.fit(topics)
 
 ## model classifier language
-filename = "classifier_topic.pickle"
+filename = "./models/classifier_language.pickle"
 classif_language = pickle.load(open(filename, 'rb'))
 languages = ['english', 'french']
 le_language = LabelEncoder()
@@ -59,21 +46,7 @@ class Stark(discord.Client, Chat):
         discord.Client.__init__(self)
         Chat.__init__(self, pairs, reflections)
         self.flag = flag
-        self.flag = True
-
-    ## define bot base commands
-    async def use_bot_command(self, mess):
-        if mess == "!ping":
-            await message.channel.send("Pong !")
-        if mess == "!date":
-            await message.channel.send("**%s**" % date)
-        if mess == "!bonjour":
-            await message.channel.send("Bonjour **%s** :smiley:" % message.author)
-        if mess == "!shutdown":
-            await message.channel.send("Bye bye !")
-            await self.logout()
-
-
+        self.flag = True£
 
     ## nltk chat bot    
     def nltk_respond(self, message):
@@ -142,21 +115,17 @@ class Stark(discord.Client, Chat):
                     try:    
                     # Waiting for the reaction
                         reaction, user = await client.wait_for('reaction_add', check=check, timeout=10.0)
-                        bot_ratings = pickle.load(open("bot_rating.sav", 'rb'))
                         if str(reaction) == "😃":
-                            bot_ratings.append(2)
-                            pickle.dump(bot_ratings, open("bot_rating.sav", 'wb'))
-                            await message.channel.send("```Thanks for you'r report```")
+                            db.Rating.insert_one({"rate":2 })
+                            await message.channel.send("```Thanks for your report```")
 
                         if str(reaction) == "😐":
-                            bot_ratings.append(1)
-                            pickle.dump(bot_ratings, open("bot_rating.sav", 'wb'))
-                            await message.channel.send("```Thanks for you'r report```")
+                            db.Rating.insert_one({"rate":1 })
+                            await message.channel.send("```Thanks for your report```")
 
                         if str(reaction) == "🙁":
-                            bot_ratings.append(0)
-                            pickle.dump(bot_ratings, open("bot_rating.sav", 'wb'))
-                            await message.channel.send("```Thanks for you'r report```") 
+                            db.Rating.insert_one({"rate":0 })
+                            await message.channel.send("```Thanks for your report```") 
 
                     except asyncio.TimeoutError:
                         await msg.delete()
@@ -166,26 +135,46 @@ class Stark(discord.Client, Chat):
                         await self.logout()
 
                 if self.flag == True:
-                    if mess.startswith("!emotion"):
-                        request = [mess[9:]]
-                        feel = emotion.predict(request)
-                        await message.channel.send("Emotions : %s" %feel)
                     if mess.startswith("!suggestion"):
-                        request = [mess[12:]]
+                        request = mess[12:]
+                        db.Suggestion.insert_one({"User":str(message.author), "Suggestion":request})
                         await message.channel.send("Thanks **%s** for you'r suggestion : **%s**" %(str(message.author)[:-5], request))
                     if mess.startswith("!imp"):
-                        request = [mess[5:]]
-                    if mess == "!score":
-                        bot_ratings = pickle.load(open("bot_rating.sav", 'rb'))
+                        listmess = mess.split(sep=" ")
+                        PID = listmess[1]
+                        TOP = listmess[2]
+                        BODlist = listmess[3:]
+                        BOD = "[NON VERIFIED] %s" %' '.join(BODlist)
+                        db.Quest_Rep.insert_one({"Topic":TOP,"Body":BOD,"ParentId":PID, "PostTypeId":2, "Score":10})
+                        await message.channel.send("Thanks for helping us")
+                    if mess == "!get rating":
+                        list_rating = db.Rating.find()
+                        bot_ratings = [resp.get("rate") for resp in list_rating]
                         good = bot_ratings.count(2)
                         medium = bot_ratings.count(1)
                         bad = bot_ratings.count(0)
                         await message.channel.send("Ratings of the bot :\n\nGood -> **%s**\nMedium -> **%s**\nBad -> **%s**" % (good, medium, bad))
-
+                    if mess == "!get suggestion":
+                        list_sugg = db.Suggestion.find()
+                        bot_sugg = [resp.get("Suggestion") for resp in list_sugg]
+                        print(bot_sugg)
+                        bot_sugg = '    ;   '.join(bot_sugg)
+                        with open("result.txt", "w") as file:
+                            file.write(bot_sugg)
+                        with open("result.txt", "rb") as file:
+                            await message.channel.send("Your file is:", file=discord.File(file, "result.txt"))
+                        os.remove("result.txt")
+                    if mess == "!emotion":
+                        list_emotion = db.Emotion.find({"User":str(message.author)})
+                        list_feel = [resp.get("Message") for resp in list_emotion]
+                        list_feel = ' '.join(list_feel)
+                        list_feel = [list_feel]
+                        feel = emotion.predict(list_feel)
+                        await message.channel.send("Hey Your global Emotions : %s" %feel)                        
                     if mess == "!help":
                         await message.channel.send("```css\nHey %s ! I'm .J.A.R.V.I.S. !\n\nI am the super cool robot created by the renowned :STARK-Agency !\nMy masters are teaching me to imitate you to steal your life !\nIn the meantime, I’m gonna explain how I work to make you believe that I am here to help you \n\nAt the moment I am an expert in datasicene. You may adrress me anything on this topic !\n\nYou can use this command bellow :\n\n   - !start -> To start converse with me\n\n   - !stop -> To stop me and evaluate me\n\n   - !suggestion (You'r suggestion) -> To give us suggestion\n\n   - !ping -> Just for fun to respond you Pong.. No in really i give you'r ping latency\n\n   - !date -> To know the actual date and hour before i control this\n\n   - !bonjour -> Just for give you smile\n\n   - !emotion `your message` -> And i will predict how you feel\n\nYou can check my documentation on :http://jarvis.github.com```" % str(message.author)[:-5])
                     if mess == "!ping":
-                        await message.channel.send("Pong ! joke.. You'r ping : {:.0f} ms".format(self.latency * 1000))
+                        await message.channel.send("Pong ! joke.. Your ping : {:.0f} ms".format(self.latency * 1000))
                     if mess == "!date":
                         await message.channel.send("**%s**" % str(date)[:-7])
                     if mess == "!test":
@@ -215,15 +204,17 @@ class Stark(discord.Client, Chat):
                     ## nltk chat part 
                     resp = self.nltk_respond(mess)
                     if resp :
+                        db.Emotion.insert_one({"User":str(message.author), "Message":mess, "Date":str(date)[:-7]})
                         await message.channel.send(resp)
 
                     ## Query mongodb DataBase
                     else:
                         try:
-                            t0 = time.time()
+
+                            pic = await message.channel.send(file=discord.File('wait.gif'))
                             resp, quest_id = self.mongodb_respond(mess, topic[0])
-                            print('request time :', time.time()-t0)
- 
+                            await pic.delete()
+
                             for i in resp:
                                 if len(i) > 1900:
                                     i1 = i[:1900]
@@ -247,11 +238,12 @@ class Stark(discord.Client, Chat):
                                         await message.channel.send("```Thanks for you'r feedback```")
                                         break
                                     if str(reaction) == "👎":
-                                        await message.channel.send("```Thanks for you'r feedback\nHelp us to improve with typing : !imp %s ANSWER```"%quest_id)
+                                        await message.channel.send("```Thanks for you'r feedback\nHelp us to improve with typing : !imp %s %s ANSWER```"%(quest_id, topic[0]))
                                 except asyncio.TimeoutError:
                                     await msg.delete()
                                     break  
                         except IndexError:
+                            await pic.delete()
                             resp = "I'm just a baby of 3 days old, i'm still learning.\nWhat do you mean by **%s** ?"%mess
                             await message.channel.send("%s"%resp)
 

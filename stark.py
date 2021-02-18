@@ -12,6 +12,7 @@ import random
 import re
 import asyncio
 from sklearn.preprocessing import LabelEncoder
+import time
 
 client = MongoClient("localhost", 27017)
 db = client["StarkBotBD"]
@@ -22,14 +23,21 @@ load_dotenv(dotenv_path="config")
 bot = commands.Bot(command_prefix = "!", description = "Bot numéro 1")
 date = datetime.datetime.now()
 
-emotion = pickle.load(open("emotion.sav", 'rb'))
+emotion = pickle.load(open("./models/emotion.sav", 'rb'))
 
 ## model classifier Topic
-filename = "classifier_topic.pickle"
+filename = "./models/classifier_topic.pickle"
 classif_topic = pickle.load(open(filename, 'rb'))
 topics = ['astronomy', 'earthscience', 'electronics', 'engineering', 'space', 'stellar', 'general']
-le = LabelEncoder()
-le.fit(topics)
+le_topic = LabelEncoder()
+le_topic.fit(topics)
+
+## model classifier language
+filename = "./models/classifier_language.pickle"
+classif_language = pickle.load(open(filename, 'rb'))
+languages = ['english', 'french']
+le_language = LabelEncoder()
+le_language.fit(languages)
 
 class Stark(discord.Client, Chat):
 
@@ -38,21 +46,7 @@ class Stark(discord.Client, Chat):
         discord.Client.__init__(self)
         Chat.__init__(self, pairs, reflections)
         self.flag = flag
-        self.flag = True
-
-    ## define bot base commands
-    async def use_bot_command(self, mess):
-        if mess == "!ping":
-            await message.channel.send("Pong !")
-        if mess == "!date":
-            await message.channel.send("**%s**" % date)
-        if mess == "!bonjour":
-            await message.channel.send("Bonjour **%s** :smiley:" % message.author)
-        if mess == "!shutdown":
-            await message.channel.send("Bye bye !")
-            await self.logout()
-
-
+        self.flag = True£
 
     ## nltk chat bot    
     def nltk_respond(self, message):
@@ -60,20 +54,22 @@ class Stark(discord.Client, Chat):
 
     ## Query Database
     def mongodb_respond(self, mess, topic):
-        title = db.Quest_Rep.find({"$text": {"$search": mess}, 'AnswerCount': {"$ne": "0"}, 'Topic':topic},
-            {'score': {'$meta': 'textScore'}})
+        
+        title = db.Quest_Rep.find({"$text": {"$search": mess}, 'Topic':topic, 'AnswerCount': {"$ne": "0"}}, {'score': {'$meta': 'textScore'}})
         title.sort([('score', {'$meta': 'textScore'})]).limit(1)
+
         ParentId = title[0].get("Id")
-        all_resp = db.Quest_Rep.find({"ParentId":ParentId, 'Topic':topic}).sort([('Score', -1)]).limit(5)
+        
+        all_resp = db.Quest_Rep.find({'Topic':topic, "ParentId":ParentId}).sort([('Score', -1)]).limit(5)
         list_resp = [resp.get("Body") for resp in all_resp]
-        #resp = list_resp[0]
+        #resp = list_resp[0]  
+        
         final_resp = []
         for i in list_resp:
             i = re.sub('<[^<]+?>', '', i)
             final_resp.append(i)
 
         
-        #mongo_resp = re.sub('<[^<]+?>', '', resp)
         return final_resp, ParentId
 
     async def on_ready(self):
@@ -193,10 +189,17 @@ class Stark(discord.Client, Chat):
                 ## Discution
             else:
                 if self.flag == True:
+
+                    ## Topic identification
                     topic = classif_topic.predict([mess])
-                    print(topic)
-                    topic = le.inverse_transform(topic)
+                    topic = le_topic.inverse_transform(topic)
                     print(topic[0])
+
+                    ## Language identification
+                    language = classif_language.predict([mess])
+                    language = le_language.inverse_transform(language)
+                    print(language[0])
+
 
                     ## nltk chat part 
                     resp = self.nltk_respond(mess)
@@ -207,10 +210,11 @@ class Stark(discord.Client, Chat):
                     ## Query mongodb DataBase
                     else:
                         try:
+
                             pic = await message.channel.send(file=discord.File('wait.gif'))
                             resp, quest_id = self.mongodb_respond(mess, topic[0])
                             await pic.delete()
- 
+
                             for i in resp:
                                 if len(i) > 1900:
                                     i1 = i[:1900]

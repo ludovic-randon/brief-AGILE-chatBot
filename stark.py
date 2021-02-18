@@ -46,7 +46,7 @@ class Stark(discord.Client, Chat):
         discord.Client.__init__(self)
         Chat.__init__(self, pairs, reflections)
         self.flag = flag
-        self.flag = True£
+        self.flag = True
 
     ## nltk chat bot    
     def nltk_respond(self, message):

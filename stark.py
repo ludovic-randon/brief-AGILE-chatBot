@@ -78,17 +78,10 @@ class Stark(discord.Client, Chat):
         if language=='english':
             trainer.train(
                 "chatterbot.corpus.english"
-                # "chatterbot.corpus.english.ai",
-                # 'chatterbot.corpus.english.botprofile',
-                # "chatterbot.corpus.english.humor",
-                # "chatterbot.corpus.english.conversations",
-                # "chatterbot.corpus.english.greetings"
             )
         elif language=='french':
             trainer.train(
                 'chatterbot.corpus.french'
-                # 'chatterbot.corpus.french.greetings',
-                # 'chatterbot.corpus.french'
             )
         return chatbot
 
@@ -105,7 +98,6 @@ class Stark(discord.Client, Chat):
 
         all_resp = db.Quest_Rep.find({'Topic':topic, "ParentId":ParentId}).sort([('Score', -1)]).limit(5)
         list_resp = [resp.get("Body") for resp in all_resp]
-        #resp = list_resp[0]  
         
         final_resp = []
         for i in list_resp:
@@ -123,7 +115,7 @@ class Stark(discord.Client, Chat):
         
         ## Auto message on start every 5 minutes
         timeout = 60*60  # 5 minutes
-        messauto = "```Hey Human !\n\nI would be pleased to help you on any topic in dastascience field !\n\nFeel free to adress me the subject by conversation or question any time.\nFor more information you may just type : !help\n\nActually with my team we are working on an amazing BOT Challenge brief !\nIf you are curious, you may download the brief here :\n\nhttps://cdn.discordapp.com/attachments/783660084395769887/808333411948429322/Brief-IA-Methodes-Agiles_-_Sprint_1.pdf\n\nHave a nice day !```"
+        messauto = "```Hey Human !\n\nI would be pleased to help you on any topic in astronomy, earthscience, electronic, engineering and Space fields !\n\nPlease feel free to adress me your concern any time.\nFor more information you may just type : \help\n\nActually, my masters are working on an amazing BOT Challenge brief !\nIf you are curious, you may download the brief here :\n\nhttps://cdn.discordapp.com/attachments/783660084395769887/808333411948429322/Brief-IA-Methodes-Agiles_-_Sprint_1.pdf\n\nHave a nice day !```"
         while True:
             await client.get_channel(808617144504811584).send(messauto)
             await asyncio.sleep(timeout)
@@ -138,15 +130,15 @@ class Stark(discord.Client, Chat):
             return
         else:
             ## Base commands of the bot
-            if mess.startswith('!'):
-                if mess == "!start":
+            if mess.startswith("\\"):
+                if mess == "\\unmute":
                     self.flag = True
-                    await message.channel.send("Hey there, how can i help you ?")
+                    await message.channel.send("Hey there, nice to see you ! How may I help you ?")
 
-                if mess == "!stop":
+                if mess == "\\mute":
                     self.flag = False
-                    await message.channel.send("Thanks for using me !")
-                    msg = await message.channel.send("```Evaluate me :```")
+                    await message.channel.send("Thanks, I was pleased to see you !")
+                    msg = await message.channel.send("```Would you please rate your user experience journey ?```")
                     await msg.add_reaction('😃')
                     await msg.add_reaction('😐')
                     await msg.add_reaction('🙁')
@@ -159,44 +151,44 @@ class Stark(discord.Client, Chat):
                         reaction, user = await client.wait_for('reaction_add', check=check, timeout=10.0)
                         if str(reaction) == "😃":
                             db.Rating.insert_one({"rate":2 })
-                            await message.channel.send("```Thanks for your report```")
+                            await message.channel.send("```Thank you, I was pleased to help you !```")
 
                         if str(reaction) == "😐":
                             db.Rating.insert_one({"rate":1 })
-                            await message.channel.send("```Thanks for your report```")
+                            await message.channel.send("```Thank you, I hope I will do better next time !```")
 
                         if str(reaction) == "🙁":
                             db.Rating.insert_one({"rate":0 })
-                            await message.channel.send("```Thanks for your report```") 
+                            await message.channel.send("```Thank you, I hope I will do better next time !```") 
 
                     except asyncio.TimeoutError:
                         await msg.delete()
 
-                if mess == "!shutdown":
+                if mess == "\\shutdown":
                         await message.channel.send("Bye bye !")
                         await self.logout()
 
                 if self.flag == True:
-                    if mess.startswith("!suggestion"):
+                    if mess.startswith("\\suggestion"):
                         request = mess[12:]
                         db.Suggestion.insert_one({"User":str(message.author), "Suggestion":request})
-                        await message.channel.send("Thanks **%s** for you'r suggestion : **%s**" %(str(message.author)[:-5], request))
-                    if mess.startswith("!imp"):
+                        await message.channel.send("Thank you **%s** for the suggestion  : **%s**" %(str(message.author)[:-5], request))
+                    if mess.startswith("\\imp"):
                         listmess = mess.split(sep=" ")
                         PID = listmess[1]
                         TOP = listmess[2]
                         BODlist = listmess[3:]
                         BOD = "[NON VERIFIED] %s" %' '.join(BODlist)
                         db.Quest_Rep.insert_one({"Topic":TOP,"Body":BOD,"ParentId":PID, "PostTypeId":2, "Score":10})
-                        await message.channel.send("Thanks for helping us")
-                    if mess == "!get rating":
+                        await message.channel.send("Thank you for this valuable contribution!")
+                    if mess == "\\get rating":
                         list_rating = db.Rating.find()
                         bot_ratings = [resp.get("rate") for resp in list_rating]
                         good = bot_ratings.count(2)
                         medium = bot_ratings.count(1)
                         bad = bot_ratings.count(0)
-                        await message.channel.send("Ratings of the bot :\n\nGood -> **%s**\nMedium -> **%s**\nBad -> **%s**" % (good, medium, bad))
-                    if mess == "!get suggestion":
+                        await message.channel.send("Bot rating  :\n\nGood -> **%s**\nMedium -> **%s**\nBad -> **%s**" % (good, medium, bad))
+                    if mess == "\\get suggestion":
                         list_sugg = db.Suggestion.find()
                         bot_sugg = [resp.get("Suggestion") for resp in list_sugg]
                         print(bot_sugg)
@@ -206,26 +198,23 @@ class Stark(discord.Client, Chat):
                         with open("result.txt", "rb") as file:
                             await message.channel.send("Your file is:", file=discord.File(file, "result.txt"))
                         os.remove("result.txt")
-                    if mess == "!emotion":
+                    if mess == "\\emotion":
                         list_emotion = db.Emotion.find({"User":str(message.author)})
                         list_feel = [resp.get("Message") for resp in list_emotion]
                         list_feel = ' '.join(list_feel)
                         list_feel = [list_feel]
                         feel = emotion.predict(list_feel)
-                        await message.channel.send("Hey Your global Emotions : %s" %feel)                        
-                    if mess == "!help":
-                        await message.channel.send("```css\nHey %s ! I'm .J.A.R.V.I.S. !\n\nI am the super cool robot created by the renowned :STARK-Agency !\nMy masters are teaching me to imitate you to steal your life !\nIn the meantime, I’m gonna explain how I work to make you believe that I am here to help you \n\nAt the moment I am an expert in datasicene. You may adrress me anything on this topic !\n\nYou can use this command bellow :\n\n   - !start -> To start converse with me\n\n   - !stop -> To stop me and evaluate me\n\n   - !suggestion (You'r suggestion) -> To give us suggestion\n\n   - !ping -> Just for fun to respond you Pong.. No in really i give you'r ping latency\n\n   - !date -> To know the actual date and hour before i control this\n\n   - !bonjour -> Just for give you smile\n\n   - !emotion `your message` -> And i will predict how you feel\n\nYou can check my documentation on :http://jarvis.github.com```" % str(message.author)[:-5])
-                    if mess == "!ping":
+                        await message.channel.send("Hey! Looks like you feel: %s" %feel)                        
+                    if mess == "\\help":
+                        await message.channel.send("```css\nHey %s ! I'm .J.A.R.V.I.S. !\n\nI am the super cool robot created by the renowned :STARK-Agency !\nMy masters are teaching me to imitate you to steal your life !\nIn the meantime, I’m gonna explain how I work to make you believe that I am here to help you \n\nAt the moment I am an expert in astronomy, earthscience, electronic, engineering and Space. You may adrress me anything on this topics !\n\nYou can use the commands bellow :\n\n   - \\unmute -> To (re)activate \n\n   - \mute -> If i am too chatty and you even may kindly rate our interaction \n\n   - \suggestion  -> To make a suggestion\n\n   - \ping -> Just for fun, I will be playefull by responding Pong.. \n\n   - \date -> To get the daily date ! \n\n   - \\bonjour -> For a smile !\n\n   - \emotion -> To predict your daily mood \n\n   - \imp -> 'Id' 'Topic' your message \n\nYou may also check the documentation on :http://jarvis.github.com```" % str(message.author)[:-5])
+                    if mess == "\\ping":
                         await message.channel.send("Pong ! joke.. Your ping : {:.0f} ms".format(self.latency * 1000))
-                    if mess == "!date":
+                    if mess == "\\date":
                         await message.channel.send("**%s**" % str(date)[:-7])
-                    if mess == "!test":
-                        await message.channel.send("```  __,_,\n  [_|_/           Hello there i'm Online\n   //\n _//    __            J.A.R.V.I.S\n(_|)   |@@|\n \ \__ \--/ __            Stark Agency\n  \o__|----|  |   __\n      \ }{ /\ )_ / _\ \n      /\__/\ \__O (__\n     (--/\--)    \__/\n     _)(  )(_                                        ID: CAABMBJMOPLR\n    `---''---`\n```")
-                    if mess == "!bonjour":
+                    if mess == "\\test":
+                        await message.channel.send("```  __,_,\n  [_|_/           Hello there I'm here at your service !\n   //\n _//    __            J.A.R.V.I.S\n(_|)   |@@|\n \ \__ \--/ __            Stark Agency\n  \o__|----|  |   __\n      \ }{ /\ )_ / _\ \n      /\__/\ \__O (__\n     (--/\--)    \__/\n     _)(  )(_                                        ID: CAABMBJMOPLR\n    `---''---`\n```")
+                    if mess == "\\bonjour":
                         await message.channel.send("Bonjour **%s** :smiley:" % str(message.author)[:-5])
-                    if mess == "!shutdown":
-                        await message.channel.send("Bye bye !")
-                        await self.logout()
 
 
                 ## Discution
@@ -276,7 +265,7 @@ class Stark(discord.Client, Chat):
                         if topic[0]!='general':
                             for i in range(nb_topics):
                                 best_topic = liste_topic[np.argmax(liste_proba)]
-                                msg = await message.channel.send("Are you speaking about %s ?\nWould you please confirm by a yes or a no" %best_topic)
+                                msg = await message.channel.send("Are you looking for information about %s ?\nWould you please confirm by yes or no" %best_topic)
                                 await msg.add_reaction('✅')
                                 await msg.add_reaction('❌')
                                     
@@ -312,7 +301,7 @@ class Stark(discord.Client, Chat):
 
                                 else:
                                     await message.channel.send(i)
-                                msg = await message.channel.send("```Would you kindly help us to improve out bot by rating the relevance of the answer```")
+                                msg = await message.channel.send("```Would you kindly help us to improve our bot by rating the relevance of the answer```")
                                 await msg.add_reaction('👍')
                                 await msg.add_reaction('👎')
                             
@@ -323,16 +312,16 @@ class Stark(discord.Client, Chat):
                                     reaction, user = await client.wait_for('reaction_add', check=check, timeout=60.0)
 
                                     if str(reaction) == "👍":
-                                        await message.channel.send("```Thanks for you'r feedback```")
+                                        await message.channel.send("```Thank you for your amazing feedback ! If I was human I would be the happiest !```")
                                         break
                                     if str(reaction) == "👎":
-                                        await message.channel.send("```Thanks for you'r feedback\nHelp us to improve with typing : !imp %s %s ANSWER```"%(quest_id, best_topic))
+                                        await message.channel.send("```Thank you for your feedback !\nWould you help us to become better by adding an anwser by typing : \\imp %s %s ANSWER```"%(quest_id, best_topic))
                                 except asyncio.TimeoutError:
                                     await msg.delete()
                                     break  
                         except IndexError:
                             await pic.delete()
-                            resp = "I'm just a baby of 3 days old, i'm still learning.\nWhat do you mean by **%s** ?"%mess
+                            resp = "I'm just a 3 days old baby, I'm still learning.\n Would you help me by telling me what do you mean by **%s** ?"%mess
                             await message.channel.send("%s"%resp)
 
 client = Stark(pairs, reflections)

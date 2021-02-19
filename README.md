@@ -1,5 +1,6 @@
 ## Agence Stark
-_______________________________________________________
+
+In our agency, we have develop a chatbot connected to the discord api. This bot can help you on any topic in astronomy, earthscience, space, electronic and engigneering. You can also have an amazing conversation with him or help us to improve it.
 
 #### Collaborateurs : 
 

@@ -34,7 +34,10 @@ emotion = pickle.load(open("./models/emotion.sav", 'rb'))
 ## model classifier Topic
 filename = "./models/classifier_topic.pickle"
 classif_topic = pickle.load(open(filename, 'rb'))
-topics = ['astronomy', 'earthscience', 'electronics', 'engineering', 'space', 'stellar', 'general']
+# topics = ['astronomy', 'earthscience', 'electronics', 'engineering', 'space', 'stellar', 'general']
+topics = db.Quest_Rep.distinct('Topic')
+nb_topics = len(topics)
+
 le_topic = LabelEncoder()
 le_topic.fit(topics)
 
@@ -231,8 +234,9 @@ class Stark(discord.Client, Chat):
                     topic = classif_topic.predict([mess])
                     topic = le_topic.inverse_transform(topic)
                     print(topic[0])
-
-                    liste_topic = list(le_topic.inverse_transform([0, 1, 2, 3, 4, 5, 6]))
+                    liste_posible_values = list(range(nb_topics))
+                    liste_topic = list(le_topic.inverse_transform(liste_posible_values))
+                    print(liste_topic)
                     pred_proba = classif_topic.predict_proba([mess])
                     liste_proba = list(pred_proba[0])
 
@@ -269,30 +273,31 @@ class Stark(discord.Client, Chat):
 
                     ## Query mongodb DataBase
                     
-                    if flag_resp==Fals:
-                        for i in range(7):
-                            best_topic = liste_topic[np.argmax(liste_proba)]
-                            msg = await message.channel.send("Are you speaking about %s ?\nWould you please confirm by a yes or a no" %best_topic)
-                            await msg.add_reaction('✅')
-                            await msg.add_reaction('❌')
-                                
-                            reac_list = ['✅','❌']
-                            check = lambda reaction, user: user == message.author and str(reaction) in reac_list
-                            try:
-                            # Waiting for the reaction
-                                reaction, user = await client.wait_for('reaction_add', check=check, timeout=30.0)
-                                if str(reaction) == "✅":
-                                    print("ok")
-                                    break
-                                if str(reaction) == "❌":
-                                    print("switch")
-                                    idx = np.argmax(liste_proba)
-                                    liste_proba.pop(idx)
-                                    liste_topic.pop(idx)
+                    if flag_resp==False:
+                        if topic[0]!='general':
+                            for i in range(nb_topics):
+                                best_topic = liste_topic[np.argmax(liste_proba)]
+                                msg = await message.channel.send("Are you speaking about %s ?\nWould you please confirm by a yes or a no" %best_topic)
+                                await msg.add_reaction('✅')
+                                await msg.add_reaction('❌')
+                                    
+                                reac_list = ['✅','❌']
+                                check = lambda reaction, user: user == message.author and str(reaction) in reac_list
+                                try:
+                                # Waiting for the reaction
+                                    reaction, user = await client.wait_for('reaction_add', check=check, timeout=30.0)
+                                    if str(reaction) == "✅":
+                                        print("ok")
+                                        break
+                                    if str(reaction) == "❌":
+                                        print("switch")
+                                        idx = np.argmax(liste_proba)
+                                        liste_proba.pop(idx)
+                                        liste_topic.pop(idx)
 
-                            except asyncio.TimeoutError:
-                                print("async")
-
+                                except asyncio.TimeoutError:
+                                    print("async")
+                        else: best_topic = topic[0]
                         try:
                             print('recherche mongoDB')
                             print(mess)

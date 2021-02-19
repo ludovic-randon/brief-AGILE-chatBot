@@ -97,10 +97,11 @@ class Stark(discord.Client, Chat):
         
         title = db.Quest_Rep.find({"$text": {"$search": mess}, 'Topic':topic, 'AnswerCount': {"$ne": "0"}}, {'score': {'$meta': 'textScore'}})
         title.sort([('score', {'$meta': 'textScore'})]).limit(1)
-        print(title[0].get("Title"))
 
         ParentId = title[0].get("Id")
-        
+        if isinstance(ParentId, int):
+            ParentId = str(ParentId)
+
         all_resp = db.Quest_Rep.find({'Topic':topic, "ParentId":ParentId}).sort([('Score', -1)]).limit(5)
         list_resp = [resp.get("Body") for resp in all_resp]
         #resp = list_resp[0]  
@@ -229,14 +230,11 @@ class Stark(discord.Client, Chat):
                 ## Discution
             else:
                 if self.flag == True:
-                    print('')
                     ## Topic identification
                     topic = classif_topic.predict([mess])
                     topic = le_topic.inverse_transform(topic)
-                    print(topic[0])
                     liste_posible_values = list(range(nb_topics))
                     liste_topic = list(le_topic.inverse_transform(liste_posible_values))
-                    print(liste_topic)
                     pred_proba = classif_topic.predict_proba([mess])
                     liste_proba = list(pred_proba[0])
 
@@ -299,12 +297,9 @@ class Stark(discord.Client, Chat):
                                     print("async")
                         else: best_topic = topic[0]
                         try:
-                            print('recherche mongoDB')
-                            print(mess)
                             pic = await message.channel.send(file=discord.File('wait.gif'))
 
                             resp, quest_id = self.mongodb_respond(mess, best_topic)
-
                             await pic.delete()
 
                             for i in resp:

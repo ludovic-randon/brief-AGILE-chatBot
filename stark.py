@@ -56,7 +56,8 @@ class Stark(discord.Client, Chat):
         Chat.__init__(self, pairs, reflections)
         self.flag = flag
         self.flag = True
-        self.threshold_chatterbot = 0.6
+        self.threshold_en = 0.6
+        self.threshold_fr = 0.2
         self.chatterbot_french = self.chatterbot_fcn('jarvis','french' )
         self.chatterbot_english = self.chatterbot_fcn('jarvis','english' )
 
@@ -258,13 +259,13 @@ class Stark(discord.Client, Chat):
                         if language[0]=='english':
                             resp = self.chatterbot_english.get_response(mess_chatterbot)
                             print('mess :', mess_chatterbot, 'chatterbot english, resp :', resp, ', confidence', resp.confidence)
-                            if resp.confidence>=self.threshold_chatterbot:
+                            if resp.confidence>=self.threshold_en:
                                 flag_resp = True
                                 await message.channel.send(resp)
                         elif language[0]=='french':
                             resp = self.chatterbot_french.get_response(mess_chatterbot)
                             print('mess :', mess_chatterbot, 'chatterbot french, resp :', resp, ', confidence', resp.confidence)
-                            if resp.confidence>=self.threshold_chatterbot:
+                            if resp.confidence>=self.threshold_fr:
                                 flag_resp = True
                                 await message.channel.send(resp)
                         ##else:

@@ -3,7 +3,6 @@ import html2markdown
 import os
 from pymongo import MongoClient
 import json
-from time import time
 
 data_path = fr'{os.getenv("HOME")}/YOUR_PATH/data'
 # subdir = "workplace.meta.stackexchange.com"
@@ -76,9 +75,6 @@ def create_mongodb_database(src, file_name):
     # INITIAL posts COUNT in DB
     init_present_posts = collection_Quest_Rep.count_documents({})
     print(init_present_posts, "posts are stored in", db.name)
-
-    # CHRONO start
-    chrono_start = time()
 
     # Subdir SRC or DATA_PATH SCAN
     # MAKE SURE THAT json OR xml FILES ARE IN
@@ -153,14 +149,10 @@ def create_mongodb_database(src, file_name):
                                               old_Id+1)
                 collection_Quest_Rep.insert_many(posts)
 
-    # CHRONO stop
-    chrono_stop = (time() - chrono_start).round(0)
-
     # INSERTED posts COUNT in DB
     present_posts = collection_Quest_Rep.count_documents({})
     inserted_posts = present_posts - init_present_posts
-    print(inserted_posts, "posts have been inserted in", db.name,
-          "in", chrono_stop, "sec")
+    print(inserted_posts, "posts have been inserted in", db.name)
     print(present_posts, "posts are stored in", db.name)
 
     # Create ID index

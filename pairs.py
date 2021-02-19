@@ -110,6 +110,10 @@ pairs = [[r"my name is (.*)",
             "How do you feel about your mother?",
             "How does this relate to your feelings today?",
             "Good family relations are important.",]],
+        [r"(.*) très fier (.*) fiston",
+            ["Merci papa,"]],
+        [r"(.*) très fier (.*)",
+            ["Merci maitre",]],
          
 ]
 

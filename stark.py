@@ -297,7 +297,7 @@ class Stark(discord.Client, Chat):
                                     print("async")
                         else: best_topic = topic[0]
                         try:
-                            pic = await message.channel.send(file=discord.File('wait.gif'))
+                            pic = await message.channel.send(file=discord.File('./assets/wait.gif'))
 
                             resp, quest_id = self.mongodb_respond(mess, best_topic)
                             await pic.delete()

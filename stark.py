@@ -20,8 +20,8 @@ from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
 
 
-client = MongoClient("localhost", 27017)
-db = client["StarkBotBD"]
+connection = MongoClient("mongodb+srv://Ludor:67SishevqV4njIXa@cluster0.rtjfn.mongodb.net/StarkBotBD?retryWrites=true&w=majority")
+db = connection["StarkBotBD"]
 collection = "Quest_Rep"
 
 load_dotenv(dotenv_path="config")
@@ -34,8 +34,8 @@ emotion = pickle.load(open("./models/emotion.sav", 'rb'))
 ## model classifier Topic
 filename = "./models/classifier_topic.pickle"
 classif_topic = pickle.load(open(filename, 'rb'))
-# topics = ['astronomy', 'earthscience', 'electronics', 'engineering', 'space', 'stellar', 'general']
-topics = db.Quest_Rep.distinct('Topic')
+topics = ['astronomy', 'earthscience', 'electronics', 'engineering', 'space', 'stellar', 'general']
+#topics = db.Quest_Rep.distinct('Topic')
 nb_topics = len(topics)
 
 le_topic = LabelEncoder()
@@ -324,6 +324,10 @@ class Stark(discord.Client, Chat):
                             resp = "I'm just a 3 days old baby, I'm still learning.\n Would you help me by telling me what do you mean by **%s** ?"%mess
                             await message.channel.send("%s"%resp)
 
+with open('token.tok') as f:
+    tok = f.read()
+TOKEN = tok
+
 client = Stark(pairs, reflections)
 #client.run(os.getenv("TOKEN"))  
-client.run('ODA4NjQ5MTU5OTI1OTU2NjI5.YCJnNw.F2YKC2ubeazi-FUClgK5H7OA9o0')
+client.run(TOKEN)

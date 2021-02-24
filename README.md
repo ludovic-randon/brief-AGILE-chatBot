@@ -23,7 +23,7 @@ Clone the repositary with :
 
 	git clone https://github.com/Ludo-R/brief-AGILE-chatBot
 
-Actually for you can run :
+To create your database :
 
 	create_DB.py 
 
@@ -36,21 +36,21 @@ You have just to edit the two first lines with your path, and dataset subfolder 
 If you want to add another dataset from everywhere, 
 you need to edit the target of query (actually "Title") and some other things ...
 
-(This step specify you need to know install MongoDB)
-More information here : https://docs.mongodb.com/manual/installation/
+(This step would need some knowledge to install and run MongoDB)
+You may found some help here : https://docs.mongodb.com/manual/installation/
 
 _______________________________________________________
 
 ### Step 2-- Create bot
 
-Create you'r Own BOT on https://discord.com/developers/applications
+Create your own BOT on https://discord.com/developers/applications
 	
 	-Select -> New Applications
 	-Pick a name and select Creat
 	-Go in "Bot" Section and select : Add bot
-	-Go in "OAuth2" Section select "Bot" in the second columns, and below select Permission you want to give to you'r bot
+	-Go in "OAuth2" Section select "Bot" in the second columns, and below select Permission you want to give to your bot
 	-Copy the link in pop-up
-	-Paste it in you'r web browser, select you'r server where you are Admin & select GO
+	-Paste it in your web browser, select your server where you are Admin & select GO
 
 _______________________________________________________
 
@@ -69,5 +69,5 @@ Past your token on the last line in :
 
 Run stark.py
 
-### ENJOY You'r new friend is Ready ;-)
+### ENJOY ! Your new friend is Ready ;-)
  

@@ -7,7 +7,7 @@ beautifulsoup4==4.9.3
 blis==0.2.4
 brotlipy==0.7.0
 certifi==2020.12.5
-ChatterBot==1.08
+ChatterBot==1.0.8
 chatterbot-corpus==1.2.0
 click==7.1.2
 constantly==15.1.0

@@ -33,7 +33,6 @@ multidict==5.1.0
 murmurhash==1.0.5
 nltk==3.5
 olefile==0.46
-pandas==1.2.1
 pandocfilters==1.4.2
 parsel==1.6.0
 Pint==0.16.1

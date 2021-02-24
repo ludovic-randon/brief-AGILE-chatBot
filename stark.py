@@ -20,7 +20,7 @@ from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
 
 
-connection = MongoClient("mongodb+srv://Ludor:67SishevqV4njIXa@cluster0.rtjfn.mongodb.net/StarkBotBD?retryWrites=true&w=majority")
+connection = MongoClient("mongodb+srv://Ludor:PWD.rtjfn.mongodb.net/StarkBotBD?retryWrites=true&w=majority")
 db = connection["StarkBotBD"]
 collection = "Quest_Rep"
 

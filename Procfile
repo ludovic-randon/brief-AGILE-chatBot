@@ -1,0 +1,1 @@
+worker: stark.py

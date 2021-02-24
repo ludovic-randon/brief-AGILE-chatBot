@@ -29,7 +29,6 @@ jmespath==0.10.0
 joblib==1.0.0
 lxml==4.6.2
 mathparse==0.1.2
-mkl-fft==1.2.0
 mkl-random==1.1.1
 mkl-service==2.3.0
 multidict==5.1.0

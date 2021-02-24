@@ -96,7 +96,7 @@ def create_mongodb_database(src, file_name):
                     topic = subdir[:-23]
                     # print(topic)
                 else:
-                    topic = subdir[:-17]
+                    topic = subdir[:-18]
 
                 # Posts in "Posts.xml" stored in posts_list
                 posts_list = [row.attrib for row in posts]
